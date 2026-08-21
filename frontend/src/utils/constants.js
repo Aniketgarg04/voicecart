@@ -1,4 +1,8 @@
-export const WS_URL = `ws://localhost:5000/ws`;
+export const WS_URL =
+  import.meta.env.VITE_WS_URL ||
+  (typeof window !== 'undefined' && window.location.protocol === 'https:'
+    ? `wss://${window.location.host}/ws`
+    : `ws://localhost:5000/ws`);
 
 export const CATEGORIES = {
   dairy: {
