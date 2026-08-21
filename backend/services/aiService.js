@@ -20,16 +20,23 @@ const ollamaClient =
     ? new Ollama({ host: process.env.OLLAMA_HOST || 'http://localhost:11434' })
     : null;
 
+const llmApiKey = process.env.GROQ_API_KEY || process.env.OPENAI_API_KEY;
+const llmBaseURL = PROVIDER === 'groq'
+  ? 'https://api.groq.com/openai/v1'
+  : (process.env.OPENAI_BASE_URL || 'https://api.openai.com/v1');
+
 const openaiClient =
-  PROVIDER === 'openai'
+  (PROVIDER === 'openai' || PROVIDER === 'groq') && llmApiKey
     ? new OpenAI({
-        apiKey: process.env.OPENAI_API_KEY,
-        baseURL: process.env.OPENAI_BASE_URL || 'https://api.openai.com/v1',
+        apiKey: llmApiKey,
+        baseURL: llmBaseURL,
       })
     : null;
 
 const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'gemma:2b';
-const OPENAI_MODEL = process.env.OPENAI_MODEL || 'gpt-4o-mini';
+const OPENAI_MODEL = PROVIDER === 'groq'
+  ? (process.env.GROQ_MODEL || 'llama-3.3-70b-versatile')
+  : (process.env.OPENAI_MODEL || 'gpt-4o-mini');
 
 // ── System Prompt ─────────────────────────────────────────────────────────────
 
@@ -145,11 +152,11 @@ export async function processCommand(history, userId) {
   let rawContent;
   try {
     rawContent =
-      PROVIDER === 'openai'
+      (PROVIDER === 'openai' || PROVIDER === 'groq')
         ? await completeWithOpenAI(messages)
         : await completeWithOllama(messages);
   } catch (err) {
-    const providerLabel = PROVIDER === 'openai' ? 'OpenAI' : 'Ollama';
+    const providerLabel = PROVIDER === 'groq' ? 'Groq' : (PROVIDER === 'openai' ? 'OpenAI' : 'Ollama');
     throw new Error(`${providerLabel} unreachable: ${err.message}`);
   }
 

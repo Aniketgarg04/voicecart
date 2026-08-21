@@ -17,12 +17,15 @@ const PROVIDER = process.env.TRANSCRIPTION_PROVIDER || 'local';
 const WHISPER_BASE_URL = process.env.WHISPER_BASE_URL || 'http://localhost:8080';
 const WHISPER_MODEL = process.env.WHISPER_MODEL || 'base';
 
-// ── OpenAI provider (production) ──────────────────────────────────────────────
-const openaiClient =
-  PROVIDER === 'openai'
-    ? new OpenAI({
-        apiKey: process.env.OPENAI_API_KEY,
-      })
+// ── Cloud Providers (OpenAI & Groq) ───────────────────────────────────────────
+const apiKey = process.env.GROQ_API_KEY || process.env.OPENAI_API_KEY;
+const baseURL = PROVIDER === 'groq' 
+  ? 'https://api.groq.com/openai/v1' 
+  : (process.env.OPENAI_BASE_URL || 'https://api.openai.com/v1');
+
+const cloudClient =
+  (PROVIDER === 'openai' || PROVIDER === 'groq') && apiKey
+    ? new OpenAI({ apiKey, baseURL })
     : null;
 
 // ── Main export ───────────────────────────────────────────────────────────────
@@ -39,8 +42,8 @@ export async function transcribeAudio(audioBuffer, mimeType = 'audio/webm') {
       'Voice transcription is disabled in .env. Use the text input bar or enable in-browser Web Speech.'
     );
   }
-  if (PROVIDER === 'openai') {
-    return transcribeWithOpenAI(audioBuffer, mimeType);
+  if (PROVIDER === 'openai' || PROVIDER === 'groq') {
+    return transcribeWithCloud(audioBuffer, mimeType);
   }
   return transcribeWithLocalWhisper(audioBuffer, mimeType);
 }
@@ -118,21 +121,23 @@ async function transcribeWithLocalWhisper(audioBuffer, mimeType) {
   return json.text ?? json.results?.[0]?.transcript ?? '';
 }
 
-// ── OpenAI Whisper API (production) ───────────────────────────────────────────
+// ── Cloud Whisper API (OpenAI / Groq) ─────────────────────────────────────────
 
-async function transcribeWithOpenAI(audioBuffer, mimeType) {
-  if (!openaiClient) {
-    throw new Error('OPENAI_API_KEY is not configured in .env');
+async function transcribeWithCloud(audioBuffer, mimeType) {
+  if (!cloudClient) {
+    const keyName = PROVIDER === 'groq' ? 'GROQ_API_KEY' : 'OPENAI_API_KEY';
+    throw new Error(`${keyName} is not configured in .env`);
   }
 
   const ext = mimeTypeToExtension(mimeType);
   const filename = `audio.${ext}`;
 
   const file = new File([audioBuffer], filename, { type: mimeType });
+  const modelName = PROVIDER === 'groq' ? 'whisper-large-v3-turbo' : (process.env.WHISPER_MODEL || 'whisper-1');
 
-  const transcription = await openaiClient.audio.transcriptions.create({
+  const transcription = await cloudClient.audio.transcriptions.create({
     file,
-    model: 'whisper-1',
+    model: modelName,
     response_format: 'json',
   });
 
