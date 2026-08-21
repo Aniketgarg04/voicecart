@@ -35,7 +35,7 @@ const openaiClient =
 
 const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'gemma:2b';
 const OPENAI_MODEL = PROVIDER === 'groq'
-  ? (process.env.GROQ_MODEL || 'llama-3.3-70b-versatile')
+  ? (process.env.GROQ_MODEL || 'groq/compound-mini')
   : (process.env.OPENAI_MODEL || 'gpt-4o-mini');
 
 // ── System Prompt ─────────────────────────────────────────────────────────────
