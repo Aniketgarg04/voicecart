@@ -1,6 +1,7 @@
-import { ShoppingBag, Sun, Moon, Plus, CheckCircle2, DollarSign } from 'lucide-react';
+import { Sun, Moon, Plus, CheckCircle2, DollarSign } from 'lucide-react';
 import useShoppingStore from '../store/useShoppingStore';
 import { WS_STATUS } from '../utils/constants';
+import Logo from './Logo';
 
 export default function Header() {
   const wsStatus     = useShoppingStore((s) => s.wsStatus);
@@ -30,21 +31,7 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
         
         {/* Left: Brand / Logo */}
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 via-indigo-600 to-violet-600 flex items-center justify-center text-white shadow-md shadow-indigo-500/25 flex-shrink-0">
-            <ShoppingBag className="w-5 h-5 text-white" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-base sm:text-lg font-bold text-[var(--text-primary)] tracking-tight">
-                VoiceCart
-              </span>
-            </div>
-            <p className="text-xs text-[var(--text-secondary)] hidden sm:block">
-              Voice-powered grocery & smart list manager
-            </p>
-          </div>
-        </div>
+        <Logo size={38} textClass="text-lg sm:text-xl" />
 
         {/* Center: Real-time Stats Widget (Desktop & Tablet) */}
         <div className="hidden md:flex items-center gap-6 px-4 py-1.5 rounded-xl bg-[var(--bg-surface-subtle)] border border-[var(--border-color)]">
