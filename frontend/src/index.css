@@ -9,6 +9,18 @@
   padding: 0;
 }
 
+/* Hide Netlify Badge / Feedback Drawer overlay */
+[data-netlify-badge],
+.netlify-badge,
+iframe[title*="Netlify"],
+div[data-netlify-drawer],
+#netlify-badge {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
 /* ── Light Mode Tokens (Default: Crisp, Modern & Realistic) ────────────────── */
 :root {
   --bg-page: #f8fafc;
